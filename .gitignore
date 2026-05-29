@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+
+data/raw/*.pdf
+data/processed/*.txt
+data/processed/*.json
+data/processed/*.csv
+data/processed/*.pkl
+data/processed/*.npy
+data/processed/*.npz
+
+__pycache__/
+*.pyc
+.venv/
+venv/
