@@ -42,16 +42,27 @@ No PDF extraction code has been written yet. The documentation is being updated 
 
 ## Initial Design Choices
 
-Start with paragraph-based chunking:
+Current chunking settings:
 
-- `chunk_size`: 150 words
-- `overlap`: 30 words
+- `chunk_size`: 300 words
+- `overlap`: 75 words
 
-Start retrieval with:
+Current retrieval setting:
 
-- `top_k`: 3
+- `top_k`: 6
 
-Use the same embedding model for both stored chunks and user questions so they are compared in the same vector space.
+## Embedding and Generation Setup
+
+This project uses local embeddings with `sentence-transformers/all-MiniLM-L6-v2`.
+No API key is needed for embedding chunks or embedding user questions.
+
+OpenCode is only used for answer generation. Create a local `.env` file:
+
+```text
+OPENCODE_KEY=your_opencode_key_here
+```
+
+The generation script reads `OPENCODE_KEY` from `.env` and sends the final prompt to OpenCode's chat completions endpoint.
 
 ## Knowledge Graph Plan
 

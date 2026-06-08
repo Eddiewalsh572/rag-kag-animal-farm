@@ -10,12 +10,12 @@ CLEANED_TEXT_PATH = PROJECT_ROOT / "data" / "processed" / "animal_farm_cleaned.t
 CHUNKS_PATH = PROJECT_ROOT / "data" / "processed" / "animal_farm_chunks.json"
 
 # A chunk is the amount of text we give the retriever at one time.
-# 150 words is small enough to stay focused, but large enough to hold an idea.
-CHUNK_SIZE_WORDS = 150
+# 300 words gives each retrieved chunk more scene context.
+CHUNK_SIZE_WORDS = 300
 
 # Overlap repeats a few words from the previous chunk in the next chunk.
 # This helps preserve context when an idea crosses a chunk boundary.
-OVERLAP_WORDS = 30
+OVERLAP_WORDS = 75
 
 
 def chunk_text(text: str, chunk_size_words: int, overlap_words: int) -> list[dict]:
@@ -48,7 +48,7 @@ def chunk_text(text: str, chunk_size_words: int, overlap_words: int) -> list[dic
         )
 
         # Move forward by the chunk size minus overlap.
-        # With 150 size and 30 overlap, each new chunk starts 120 words later.
+        # With 300 size and 75 overlap, each new chunk starts 250 words later.
         start_index += chunk_size_words - overlap_words
         chunk_id += 1
 
