@@ -10,6 +10,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # The graph query script reads the manual seed graph facts.
 GRAPH_FACTS_PATH = PROJECT_ROOT / "data" / "processed" / "animal_farm_graph_facts.json"
 
+MAX_GRAPH_FACTS = 5
+
 STOPWORDS = {
     "a",
     "an",
@@ -79,9 +81,8 @@ def tokenize_query(query: str) -> list[str]:
     return tokens
 
 
-def fact_matches_query(fact: dict, query: str) -> bool:
-    """Check whether the query matches the searchable fact fields."""
-    lowercase_query = query.lower()
+def graph_fact_search_text(fact: dict) -> str:
+    """Combine searchable graph fact fields into one lowercase string."""
     searchable_fields = [
         "source_entity",
         "relation",
@@ -93,28 +94,48 @@ def fact_matches_query(fact: dict, query: str) -> bool:
     for field in searchable_fields:
         searchable_parts.append(str(fact.get(field, "")).lower())
 
-    searchable_text = " ".join(searchable_parts)
-    query_tokens = tokenize_query(query)
+    return " ".join(searchable_parts)
 
-    if not query_tokens:
-        return lowercase_query in searchable_text
+
+def score_graph_fact(fact: dict, query: str) -> int:
+    """Count how many query tokens appear in a graph fact."""
+    query_tokens = tokenize_query(query)
+    searchable_text = graph_fact_search_text(fact)
+    score = 0
 
     for token in query_tokens:
         if token in searchable_text:
-            return True
+            score += 1
 
-    return False
+    return score
+
+
+def fact_matches_query(fact: dict, query: str) -> bool:
+    """Check whether the query matches the searchable fact fields."""
+    query_tokens = tokenize_query(query)
+
+    if not query_tokens:
+        lowercase_query = query.lower()
+        searchable_text = graph_fact_search_text(fact)
+        return lowercase_query in searchable_text
+
+    return score_graph_fact(fact, query) > 0
 
 
 def find_matching_facts(graph_data: dict, query: str) -> list[dict]:
-    """Return graph facts that match the query."""
+    """Return the best matching graph facts for the query."""
     matching_facts = []
 
     for fact in graph_data["facts"]:
-        if fact_matches_query(fact, query):
-            matching_facts.append(fact)
+        score = score_graph_fact(fact, query)
 
-    return matching_facts
+        if score > 0:
+            fact_copy = fact.copy()
+            fact_copy["match_score"] = score
+            matching_facts.append(fact_copy)
+
+    matching_facts.sort(key=lambda fact: fact["match_score"], reverse=True)
+    return matching_facts[:MAX_GRAPH_FACTS]
 
 
 def print_fact(fact: dict) -> None:
@@ -129,6 +150,9 @@ def print_fact(fact: dict) -> None:
     print(f"Description: {fact['description']}")
     print(f"Evidence chunks: {', '.join(evidence_chunk_ids)}")
     print(f"Confidence: {fact['confidence']}")
+
+    if "match_score" in fact:
+        print(f"Match score: {fact['match_score']}")
 
 
 def main() -> None:
