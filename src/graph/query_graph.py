@@ -1,4 +1,5 @@
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -9,6 +10,50 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # The graph query script reads the manual seed graph facts.
 GRAPH_FACTS_PATH = PROJECT_ROOT / "data" / "processed" / "animal_farm_graph_facts.json"
 
+STOPWORDS = {
+    "a",
+    "an",
+    "the",
+    "and",
+    "or",
+    "but",
+    "to",
+    "of",
+    "in",
+    "on",
+    "for",
+    "with",
+    "from",
+    "by",
+    "at",
+    "as",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "do",
+    "does",
+    "did",
+    "have",
+    "has",
+    "had",
+    "how",
+    "what",
+    "why",
+    "when",
+    "where",
+    "who",
+    "whom",
+    "which",
+    "role",
+    "play",
+    "plays",
+    "played",
+}
+
 
 def load_graph_facts(path: Path) -> dict:
     """Load the full graph facts JSON file."""
@@ -16,8 +61,26 @@ def load_graph_facts(path: Path) -> dict:
         return json.load(file)
 
 
+def tokenize_query(query: str) -> list[str]:
+    """Turn a natural language query into simple searchable tokens."""
+    lowercase_query = query.lower()
+    words = re.findall(r"[a-z]+", lowercase_query)
+    tokens = []
+
+    for word in words:
+        if len(word) < 3:
+            continue
+
+        if word in STOPWORDS:
+            continue
+
+        tokens.append(word)
+
+    return tokens
+
+
 def fact_matches_query(fact: dict, query: str) -> bool:
-    """Check whether the query appears in one of the searchable fact fields."""
+    """Check whether the query matches the searchable fact fields."""
     lowercase_query = query.lower()
     searchable_fields = [
         "source_entity",
@@ -25,11 +88,19 @@ def fact_matches_query(fact: dict, query: str) -> bool:
         "target_entity",
         "description",
     ]
+    searchable_parts = []
 
     for field in searchable_fields:
-        field_value = str(fact.get(field, "")).lower()
+        searchable_parts.append(str(fact.get(field, "")).lower())
 
-        if lowercase_query in field_value:
+    searchable_text = " ".join(searchable_parts)
+    query_tokens = tokenize_query(query)
+
+    if not query_tokens:
+        return lowercase_query in searchable_text
+
+    for token in query_tokens:
+        if token in searchable_text:
             return True
 
     return False
