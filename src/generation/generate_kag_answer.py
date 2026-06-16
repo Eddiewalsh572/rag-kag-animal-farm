@@ -167,6 +167,9 @@ def main() -> None:
     print("Text evidence used:")
     print_text_evidence_used(evidence_chunks)
 
+    print("\nGenerated KAG answer repeated:")
+    print(answer)
+
 
 if __name__ == "__main__":
     main()

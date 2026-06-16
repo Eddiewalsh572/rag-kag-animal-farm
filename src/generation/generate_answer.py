@@ -189,6 +189,9 @@ def main() -> None:
         print("   Preview:")
         print(f"   {preview_text(chunk['text'])}\n")
 
+    print("\nGenerated answer:")
+    print(answer)
+
 
 if __name__ == "__main__":
     main()
