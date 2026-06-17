@@ -237,7 +237,7 @@ def main() -> None:
     print("\nText evidence used:")
     print_text_evidence_used(evidence_chunks)
 
-    print("\nGenerated DB-backed RAG answer repeated for presentation:")
+    print("\nGenerated DB-backed RAG answer repeated")
     print(answer)
 
 
