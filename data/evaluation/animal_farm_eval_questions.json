@@ -1,0 +1,162 @@
+[
+  {
+    "id": "boxer_fate",
+    "question": "What happens to Boxer?",
+    "category": "character_fate",
+    "difficulty": "easy",
+    "expected_keywords": ["Boxer", "van", "knacker", "Squealer", "hospital"],
+    "expected_answer_points": [
+      "Boxer is injured or worn out after years of labor.",
+      "He is taken away in a van that the animals identify as connected to a knacker.",
+      "Squealer later gives the animals a comforting explanation that Boxer died in a hospital.",
+      "A strong answer should distinguish what the animals see from what Squealer claims."
+    ],
+    "expected_retrieval_terms": ["Boxer", "van", "knacker", "hospital", "Squealer"],
+    "best_answer_type": "either",
+    "notes": "Useful for checking whether retrieval finds a specific late-story event and whether the answer separates evidence from propaganda."
+  },
+  {
+    "id": "napoleons_dogs_role",
+    "question": "What role do Napoleon's dogs play?",
+    "category": "character_role",
+    "difficulty": "medium",
+    "expected_keywords": ["Napoleon", "dogs", "intimidate", "Snowball", "control"],
+    "expected_answer_points": [
+      "The dogs act as Napoleon's private force.",
+      "They chase Snowball away from the farm.",
+      "They intimidate the other animals and discourage opposition.",
+      "They help Napoleon replace debate with fear-based control."
+    ],
+    "expected_retrieval_terms": ["Napoleon", "dogs", "Snowball", "growl", "fear", "debate"],
+    "best_answer_type": "KAG",
+    "notes": "Good KAG test because the strongest answer depends on relationships among Napoleon, dogs, Snowball, and the other animals."
+  },
+  {
+    "id": "squealer_boxer_explanation",
+    "question": "How does Squealer explain what happened to Boxer?",
+    "category": "claim_vs_reality",
+    "difficulty": "medium",
+    "expected_keywords": ["Squealer", "Boxer", "hospital", "van", "knacker", "reassure"],
+    "expected_answer_points": [
+      "Squealer claims Boxer received care and died peacefully or honorably.",
+      "He denies or redirects the animals' concern about the van's lettering.",
+      "His explanation softens the reality suggested by the evidence.",
+      "A strong answer should identify Squealer's role in controlling the story."
+    ],
+    "expected_retrieval_terms": ["Squealer", "Boxer", "hospital", "knacker", "van", "death"],
+    "best_answer_type": "KAG",
+    "notes": "Useful for measuring whether the system can compare an official explanation with surrounding evidence."
+  },
+  {
+    "id": "propaganda_control",
+    "question": "How does propaganda help Napoleon maintain control?",
+    "category": "theme",
+    "difficulty": "hard",
+    "expected_keywords": ["propaganda", "Squealer", "Napoleon", "Snowball", "Jones", "memory"],
+    "expected_answer_points": [
+      "Squealer explains Napoleon's decisions in ways that make them seem necessary.",
+      "The animals are warned about the possible return of Jones.",
+      "Snowball is blamed for failures or treated as an enemy.",
+      "Propaganda changes how the animals remember events and accept power."
+    ],
+    "expected_retrieval_terms": ["Squealer", "Napoleon", "Jones", "Snowball", "statistics", "remember"],
+    "best_answer_type": "KAG",
+    "notes": "A relationship-heavy synthesis question where graph facts may help connect Squealer, Napoleon, Jones, Snowball, and manipulation."
+  },
+  {
+    "id": "seven_commandments_change",
+    "question": "How do the Seven Commandments change?",
+    "category": "commandment_change",
+    "difficulty": "hard",
+    "expected_keywords": ["Commandments", "changed", "animals", "equal", "loopholes", "pigs"],
+    "expected_answer_points": [
+      "The commandments begin as strict rules meant to protect Animalism.",
+      "Over time, the wording is altered to excuse pig behavior.",
+      "The final commandment collapses equality into a hierarchy favoring the pigs.",
+      "A strong answer should describe the pattern of change, not just one commandment."
+    ],
+    "expected_retrieval_terms": ["Commandments", "equal", "changed", "pigs", "animals", "more equal"],
+    "best_answer_type": "either",
+    "notes": "Tests retrieval across multiple scenes and whether neighbor chunks provide enough evidence for final wording."
+  },
+  {
+    "id": "snowball_blame",
+    "question": "How is Snowball blamed for problems on the farm?",
+    "category": "claim_vs_reality",
+    "difficulty": "medium",
+    "expected_keywords": ["Snowball", "blamed", "windmill", "Napoleon", "scapegoat"],
+    "expected_answer_points": [
+      "Snowball is blamed for damage or failures after he is expelled.",
+      "The accusations help redirect anger away from Napoleon's leadership.",
+      "Snowball becomes a convenient enemy figure.",
+      "A strong answer should explain why blaming Snowball is politically useful."
+    ],
+    "expected_retrieval_terms": ["Snowball", "windmill", "blamed", "destroyed", "traitor"],
+    "best_answer_type": "KAG",
+    "notes": "Good for KAG because it involves a recurring relation: Napoleon's regime uses Snowball as a scapegoat."
+  },
+  {
+    "id": "squealer_manipulation",
+    "question": "How does Squealer manipulate the animals?",
+    "category": "character_role",
+    "difficulty": "medium",
+    "expected_keywords": ["Squealer", "manipulates", "statistics", "Jones", "Snowball", "commandments"],
+    "expected_answer_points": [
+      "Squealer uses persuasive explanations to defend Napoleon's decisions.",
+      "He uses fear, especially the threat of Jones returning.",
+      "He revises or reframes past events involving Snowball.",
+      "He helps make changes to the commandments seem acceptable or unnoticed."
+    ],
+    "expected_retrieval_terms": ["Squealer", "statistics", "figures", "Jones", "Snowball", "commandments"],
+    "best_answer_type": "KAG",
+    "notes": "Checks whether graph facts improve answers that require connecting several manipulation tactics."
+  },
+  {
+    "id": "napoleon_gains_power",
+    "question": "How does Napoleon gain power on the farm?",
+    "category": "broad_synthesis",
+    "difficulty": "hard",
+    "expected_keywords": ["Napoleon", "dogs", "Snowball", "debate", "Squealer", "power"],
+    "expected_answer_points": [
+      "Napoleon builds private force through the dogs.",
+      "He removes Snowball as a rival.",
+      "He ends open debate and centralizes decision-making.",
+      "Squealer helps justify Napoleon's authority to the animals."
+    ],
+    "expected_retrieval_terms": ["Napoleon", "dogs", "Snowball", "debate", "Squealer", "leader"],
+    "best_answer_type": "KAG",
+    "notes": "Useful for comparing whether KAG better organizes power relationships than plain retrieved text alone."
+  },
+  {
+    "id": "windmill_claim_reality",
+    "question": "How does the story of the windmill show a difference between claims and reality?",
+    "category": "claim_vs_reality",
+    "difficulty": "hard",
+    "expected_keywords": ["windmill", "Napoleon", "Snowball", "Squealer", "claim", "reality"],
+    "expected_answer_points": [
+      "The windmill becomes tied to changing official explanations.",
+      "Snowball's role or ideas are reframed after he is expelled.",
+      "The leadership's claims shift to protect Napoleon's authority.",
+      "A strong answer should show how public explanations differ from what readers can infer."
+    ],
+    "expected_retrieval_terms": ["windmill", "Snowball", "Napoleon", "Squealer", "plans", "destroyed"],
+    "best_answer_type": "KAG",
+    "notes": "Tests whether the system can connect claims, blame, and political rewriting across scenes."
+  },
+  {
+    "id": "exact_final_commandment",
+    "question": "What is the final commandment about equality?",
+    "category": "retrieval_specific",
+    "difficulty": "easy",
+    "expected_keywords": ["animals", "equal", "more equal", "commandment"],
+    "expected_answer_points": [
+      "The answer should identify that the final equality commandment has been altered.",
+      "It should mention the idea that some animals are treated as more equal than others.",
+      "It should avoid quoting long passages beyond what is needed to answer.",
+      "It should cite the chunk that contains the final commandment wording if citations are enabled."
+    ],
+    "expected_retrieval_terms": ["equal", "more equal", "animals", "commandment"],
+    "best_answer_type": "RAG",
+    "notes": "A precise retrieval test where the correct evidence is likely in a specific chunk or neighboring chunk."
+  }
+]
