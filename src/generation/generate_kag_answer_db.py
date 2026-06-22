@@ -146,20 +146,17 @@ def print_text_evidence_used(evidence_chunks: list[dict]) -> None:
         print(f"   Preview: {preview_text(chunk['text'])}")
 
 
-def main() -> None:
-    """Generate a DB-backed KAG answer from retrieved chunks and extracted facts."""
-    question = " ".join(sys.argv[1:]).strip()
-
-    if not question:
-        print('Usage: python3 src/generation/generate_kag_answer_db.py "What happens to Boxer?"')
-        return
-
+def generate_kag_answer_for_question(question: str) -> dict:
+    """Run the DB-backed KAG flow and return the answer, facts, and evidence."""
     model = SentenceTransformer(DEFAULT_LOCAL_EMBEDDING_MODEL)
     retrieved_chunks = retrieve_top_chunks_from_db(question, model, TOP_K)
 
     if not retrieved_chunks:
-        print("No chunks were found in Postgres. Run store_chunks_embeddings.py first.")
-        return
+        return {
+            "answer": "No chunks were found in Postgres. Run store_chunks_embeddings.py first.",
+            "graph_facts": [],
+            "evidence_chunks": [],
+        }
 
     evidence_chunks = fetch_neighbor_chunks_from_db(retrieved_chunks)
     evidence_chunk_indexes = set()
@@ -174,6 +171,26 @@ def main() -> None:
 
     answer_prompt = build_kag_answer_prompt(question, evidence_chunks, graph_facts)
     answer = generate_kag_answer(answer_prompt)
+
+    return {
+        "answer": answer,
+        "graph_facts": graph_facts,
+        "evidence_chunks": evidence_chunks,
+    }
+
+
+def main() -> None:
+    """Generate a DB-backed KAG answer from retrieved chunks and extracted facts."""
+    question = " ".join(sys.argv[1:]).strip()
+
+    if not question:
+        print('Usage: python3 src/generation/generate_kag_answer_db.py "What happens to Boxer?"')
+        return
+
+    result = generate_kag_answer_for_question(question)
+    answer = result["answer"]
+    graph_facts = result["graph_facts"]
+    evidence_chunks = result["evidence_chunks"]
 
     print(f"Question: {question}")
     print("Retrieval source: Postgres + pgvector")

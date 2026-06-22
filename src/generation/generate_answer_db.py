@@ -210,6 +210,27 @@ def print_text_evidence_used(evidence_chunks: list[dict]) -> None:
         print(f"   {preview_text(chunk['text'])}\n")
 
 
+def generate_rag_answer_for_question(question: str) -> dict:
+    """Run the DB-backed RAG flow and return the answer plus evidence."""
+    model = SentenceTransformer(DEFAULT_LOCAL_EMBEDDING_MODEL)
+    retrieved_chunks = retrieve_top_chunks_from_db(question, model, TOP_K)
+
+    if not retrieved_chunks:
+        return {
+            "answer": "No chunks were found in Postgres. Run store_chunks_embeddings.py first.",
+            "evidence_chunks": [],
+        }
+
+    evidence_chunks = fetch_neighbor_chunks_from_db(retrieved_chunks)
+    prompt = build_prompt(question, evidence_chunks)
+    answer = generate_opencode_answer(prompt)
+
+    return {
+        "answer": answer,
+        "evidence_chunks": evidence_chunks,
+    }
+
+
 def main() -> None:
     """Generate a RAG answer using chunks retrieved from Postgres."""
     question = " ".join(sys.argv[1:]).strip()
@@ -217,16 +238,9 @@ def main() -> None:
     if not question:
         question = TEST_QUESTION
 
-    model = SentenceTransformer(DEFAULT_LOCAL_EMBEDDING_MODEL)
-    retrieved_chunks = retrieve_top_chunks_from_db(question, model, TOP_K)
-
-    if not retrieved_chunks:
-        print("No chunks were found in Postgres. Run store_chunks_embeddings.py first.")
-        return
-
-    evidence_chunks = fetch_neighbor_chunks_from_db(retrieved_chunks)
-    prompt = build_prompt(question, evidence_chunks)
-    answer = generate_opencode_answer(prompt)
+    result = generate_rag_answer_for_question(question)
+    answer = result["answer"]
+    evidence_chunks = result["evidence_chunks"]
 
     print(f"Question: {question}")
     print("Retrieval source: Postgres + pgvector")
