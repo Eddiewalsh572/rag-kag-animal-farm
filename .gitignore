@@ -14,3 +14,4 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+data/evaluation/results/
