@@ -202,7 +202,7 @@ def main() -> None:
     print_graph_facts_used(graph_facts)
     print_text_evidence_used(evidence_chunks)
 
-    print("\nGenerated DB-backed KAG answer repeated")
+    print("\nGenerated DB-backed KAG answer:")
     print(answer)
 
     print(
