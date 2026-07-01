@@ -1,142 +1,127 @@
-# Animal Farm RAG/KAG Learning Project
+# Animal Farm RAG/KAG Project Context
 
 ## Project Goal
 
-This project is a beginner-friendly RAG/KAG system built around Animal Farm using a publicly accessible Internet Archive PDF as the source document.
+This project is a beginner-to-intermediate RAG/KAG learning project built around Animal Farm.
 
-The main goal is not to build the most advanced system. The goal is to understand and explain each design decision clearly, including how text is cleaned, chunked, embedded, retrieved, and used to generate answers.
+The goal is to understand and explain an end-to-end DB-backed pipeline: source document ingestion, text cleaning, chunking, local embeddings, PostgreSQL/pgvector storage, retrieval, RAG answer generation, KAG-style graph fact extraction, and lightweight evaluation.
 
-This project should be simple enough that I can explain each step to my tech lead.
+The project should stay clean enough to explain to a tech lead without hiding the important steps behind a large framework.
 
-## Source Document Approach
+## Current Supported Path
 
-The project will use a publicly accessible Internet Archive PDF of Animal Farm as the starting source document.
+The main supported path is PostgreSQL + pgvector.
 
-This project is for private educational learning only. The full book text should not be redistributed in the README, examples, generated sample outputs, or committed documentation.
+The older local JSON retrieval/generation/manual-graph prototype path has been removed. Local JSON files are still used as rebuild artifacts where they make sense, especially for chunks and embeddings before loading data into the database.
 
-If the user provides the PDF file, store it locally in:
+Current high-level flow:
 
-- data/raw/
+1. `data/raw/animal_farm.pdf`
+2. `src/ingestion/extract_pdf_text.py`
+3. `src/ingestion/clean_text.py`
+4. `src/ingestion/chunk_text.py`
+5. `src/embeddings/embed_chunks.py`
+6. `src/db/store_chunks_embeddings.py`
+7. `src/retrieval/retrieve_chunks_db.py`
+8. `src/generation/generate_answer_db.py`
+9. `src/generation/generate_kag_answer_db.py`
+10. `src/evaluation/run_rag_kag_eval.py`
+11. `src/evaluation/summarize_eval_results.py`
 
-The pipeline should then extract text from the PDF into:
-
-- data/processed/
-
-The extracted text is an intermediate local artifact for learning how ingestion works. It should be handled carefully and should not be copied into documentation or shared as generated output.
-
-## Why Animal Farm?
-
-Animal Farm is shorter and more structured than the previous Frankenstein project. This makes it easier to manually inspect chunks, test retrieval quality, and build a simple knowledge graph around characters, themes, and major events.
-
-Because Animal Farm may still be copyrighted in some jurisdictions, the project should use only a source PDF that the user provides or identifies as publicly accessible for their private educational use. The project should avoid redistributing the full text.
-
-## Main Learning Questions
-
-1. How do we load and clean text?
-2. How do we split text into chunks?
-3. Why did we choose a certain chunk size?
-4. How do embeddings turn chunks into vectors?
-5. Why should chunks and questions use the same embedding model?
-6. How do we retrieve the most relevant chunks?
-7. Why did we choose a certain number of retrieved chunks?
-8. How does a simple knowledge graph help organize relationships?
-9. How can RAG and KAG work together?
-
-## Initial RAG Design Choices
+## Current Design Choices
 
 ### Ingestion
 
-Start with a simple PDF ingestion flow:
+The project keeps ingestion steps separate so each transformation is easy to inspect:
 
-1. Store the source PDF in data/raw/.
-2. Extract plain text from the PDF into data/processed/.
-3. Clean obvious extraction artifacts such as repeated headers, page numbers, extra whitespace, and broken line wrapping.
-4. Save the cleaned text as a local processed file.
-5. Chunk the cleaned text for retrieval.
+- extract text from the PDF
+- clean repeated PDF artifacts and spacing issues
+- chunk the cleaned text
+- generate embeddings for each chunk
+- load embedded chunks into PostgreSQL
 
-Reasoning:
-
-Using the PDF makes the project closer to a real document ingestion pipeline while still staying beginner-friendly. Keeping each step separate makes it easier to explain what changed between the original PDF, extracted text, cleaned text, and final chunks.
-
-### Chunking
-
-Start with paragraph-based chunking.
-
-Initial settings:
-
-- chunk_size: 150 words
-- overlap: 30 words
-
-Reasoning:
-
-Animal Farm is a shorter source than Frankenstein, so smaller chunks should make retrieval more focused. A 150-word chunk is large enough to contain a useful idea, but small enough to avoid pulling in too much unrelated context.
-
-The 30-word overlap helps preserve context when an idea is split across two chunks.
-
-### Retrieval
-
-Start with:
-
-- top_k: 3
-
-Reasoning:
-
-Because the dataset is small, retrieving too many chunks may add unnecessary noise. Three chunks should provide enough supporting context while keeping the answer focused.
+The generated files in `data/processed/` are local rebuild artifacts. They should generally stay untracked, but they are not obsolete.
 
 ### Embeddings
 
-Use one embedding model for both stored chunks and user questions.
+The project uses local Hugging Face sentence-transformer embeddings with `sentence-transformers/all-MiniLM-L6-v2`.
 
-Reasoning:
+The embeddings are 384-dimensional, matching the pgvector column defined in the database schema.
 
-Chunks and questions need to be embedded into the same vector space so similarity comparisons are meaningful.
+### Retrieval
 
-## Initial KAG Design Choices
+Current retrieval uses `src/retrieval/retrieve_chunks_db.py`.
 
-Start with a simple manually created knowledge graph.
+It retrieves from PostgreSQL using pgvector similarity and then applies simple keyword reranking. This keeps the retrieval logic readable while still using the database-backed vector store.
 
-Do not begin with automatic graph extraction.
+### RAG
 
-Reasoning:
+Current RAG uses `src/generation/generate_answer_db.py`.
 
-Manual graph creation is better for learning because each node and edge can be inspected and explained. Automatic extraction can be added later after the basic graph structure is understood.
+It retrieves relevant chunks from PostgreSQL, expands evidence with nearby chunks, builds a grounded prompt, and asks the generator to answer using only the provided evidence.
 
-Example entity types:
+### KAG
 
-- Character
-- Place
-- Theme
-- Event
-- Object
+Current KAG uses:
 
-Example relationships:
+- `src/generation/generate_kag_answer_db.py`
+- `src/graph/extract_question_graph_facts_db.py`
+- `src/graph/review_graph_candidates_db.py`
+- the `graph_fact_candidates` database table
 
-- Napoleon OPPOSES Snowball
-- Squealer USES Propaganda
-- Old Major INSPIRES Rebellion
-- Boxer REPRESENTS Loyalty
-- Pigs CONTROL Animal Farm
-- Commandments CHANGE_OVER_TIME
+The KAG flow extracts graph-style facts from retrieved evidence for the current question. These facts are stored as candidates first.
 
-## Build Order
+The `graph_nodes` and `graph_edges` tables may currently be empty. That is expected for this stage of the project. A future improvement would promote reviewed candidates into persistent graph nodes and edges.
 
-1. Create project structure
-2. Add the publicly accessible Internet Archive PDF to data/raw/ when provided
-3. Extract text from the PDF into data/processed/
-4. Clean the extracted text
-5. Chunk the cleaned text
-6. Inspect chunks manually
-7. Generate embeddings
-8. Store chunks and embeddings
-9. Retrieve similar chunks for a question
-10. Generate an answer using retrieved context
-11. Add a simple knowledge graph
-12. Combine RAG chunks with KAG relationships
+## Evaluation
 
-## Important Project Constraint
+Evaluation uses:
 
-Keep the project beginner-friendly.
+- `data/evaluation/animal_farm_eval_questions.json`
+- `src/evaluation/run_rag_kag_eval.py`
+- `src/evaluation/summarize_eval_results.py`
 
-Avoid unnecessary frameworks, complex infrastructure, or advanced optimization until the basic RAG pipeline is fully understood.
+The evaluator is lightweight and heuristic. It compares RAG and KAG answers using expected keywords, citation checks, evidence chunk counts, graph fact counts, and a simple score. It is useful for development review, but it is not a perfect answer-quality evaluator.
 
-Do not include long excerpts or the full book text in documentation, examples, generated outputs, or public commits. Use short summaries, metadata, or small private local snippets only when needed for debugging.
+Evaluation result files are written to `data/evaluation/results/`, which should stay ignored.
+
+## Useful Commands
+
+```bash
+docker compose up -d
+make doctor
+make check
+make rag QUESTION="What happens to Boxer?"
+make kag QUESTION="What happens to Boxer?"
+make eval ID=boxer_fate MODE=both
+make summary
+```
+
+Other useful shortcuts:
+
+```bash
+make demo-boxer
+make demo-dogs
+make clean-cache
+```
+
+## Data And Git Safety
+
+Do not commit `.env`.
+
+These are local artifacts and should generally stay untracked unless intentionally added:
+
+- `data/raw/animal_farm.pdf`
+- `data/processed/animal_farm_extracted.txt`
+- `data/processed/animal_farm_cleaned.txt`
+- `data/processed/animal_farm_chunks.json`
+- `data/processed/animal_farm_embeddings.json`
+- `data/evaluation/results/`
+- presentation PDFs
+
+## Current Limitations
+
+- Graph fact candidates are not yet promoted into persistent reviewed graph nodes and graph edges.
+- Evaluation is heuristic and should be treated as a development aid.
+- There is no UI or API layer yet.
+- The next useful expansion would be trying the same pipeline on more business-like documents.
