@@ -1,12 +1,13 @@
 .DEFAULT_GOAL := help
 PYTHON := .venv/bin/python
 
-.PHONY: help check rag kag eval summary demo-boxer demo-dogs clean-cache
+.PHONY: help check doctor rag kag eval summary demo-boxer demo-dogs clean-cache
 
 # Show the available project shortcuts.
 help:
 	@echo "Animal Farm RAG/KAG Makefile commands:"
 	@echo "  make check"
+	@echo "  make doctor"
 	@echo "  make rag QUESTION=\"What happens to Boxer?\""
 	@echo "  make kag QUESTION=\"What happens to Boxer?\""
 	@echo "  make eval ID=boxer_fate MODE=both"
@@ -19,6 +20,10 @@ help:
 # Check the database connection and pgvector setup.
 check:
 	$(PYTHON) src/db/check_connection.py
+
+# Check whether the project is ready to run or demo.
+doctor:
+	$(PYTHON) src/project_doctor.py
 
 # Run a DB-backed RAG answer. Provide QUESTION="...".
 rag:
